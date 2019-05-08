@@ -3,46 +3,18 @@ import datetime as d
 import sqlite3 as s
 from sqlite3 import Error
 import random
+#https://stackabuse.com/a-sqlite-tutorial-with-python/
 
-##def createConnection(dbFile):
-##    try:
-##        conn = sqlite3.connect(dbFile)
-##        return conn
-##    
-##    except Error as e:
-##        print(e)
-##
-##    return None
-##
-##def createTable(conn,createTableSql):
-##    try:
-##        c = conn.cursor()
-##        c.execute(createTableSql)
-##
-##    except Error as e:
-##        print(e)
-##
-##        
-##
-##
-##
-##
-##if __name__ == "__main__":
-##    createSql()
-##    
-##    
+con = s.connect("dbFile.db")
+cur = con.cursor()
 
-class database():
-    def __init__(self):
-        self.name
-        self.conn = s.connect(self.name+".db")
+usersTable = """ CREATE TABLE users (
+    id integer PRIMARY KEY,
+    firstName text NOT NULL,
+    lastName text NOT NULL) """
+cur.execute(usersTable)
+bookTable = """ CREATE TABLE books (
+    id integer PRIMARY KEY,
+    name
 
-conn = s.connect("user.db")
-c = conn.cursor()
-conn2 = s.connect("resource.db")
-q = conn2.cursor()
-c.execute("CREATE TABLE user (card TEXT PRIMARY KEY, name TEXT)")
-
-
-##c.execute("SELECT * FROM users WHERE card=:cardNo",{"cardNo":cardNo})
-
+)
