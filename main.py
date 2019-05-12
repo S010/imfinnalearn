@@ -2,8 +2,7 @@ import tkinter as t
 import datetime as d
 import sqlite3 as s
 from sqlite3 import Error
-import random
-import hashlib
+import hashlib, binascii , os ,random
 #https://stackabuse.com/a-sqlite-tutorial-with-python/
 con = s.connect("dbFile.db")
 cur = con.cursor()
@@ -41,7 +40,7 @@ cdtable = """CREATE TABLE cds(
             takenout bit
         )"""
 
-def checkForKeyCode(r):
+def checkForKeyCodeUsers(r):
     cur.execute('SELECT keycode FROM users WHERE keycode='+str(r))
     data =cur.fetchall()
     if not data:
@@ -51,14 +50,43 @@ def checkForKeyCode(r):
         print("key already exists :(")
         return True
 
+def checkForKeyCodeAdmins(r):
+    cur.execute('SELECT keycode FROM admins WHERE keycode='+str(r))
+    data =cur.fetchall()
+    if not data:
+        print("key does not match keycodes :)")
+        return False
+    else:
+        print("key already exists :(")
+        return True
+
 def generateKeyCode():
-    while True: 
+    while True:
         randomKey = random.randint(0,999999999)
-        if checkForKeyCode(randomKey) == False:
+        if checkForKeyCodeUsers(randomKey) == False and checkForKeyCodeAdmins(randomKey) == False:
             return randomKey
 
 def generateUserId():
-    cur.execute('SELECT * FROM users ORDER BY id DESC LIMIT 1')
+    cur.execute('SELECT MAX(id) FROM users')
+    data = cur.fetchall()
+    userId = (data[0][0]) + 1
+    return userId
+def generateAdminId():
+    cur.execute
+
+def hashingPassword(p):
+    salt = hashlib.sha256(os.urandom(60)).hexdigest().encode("ascii")
+    passwordHash = hashlib.pbkdf2_hmac("sha256",p.encode("utf-8"),salt,100000)
+    passwordHash = binascii.hexlify(passwordHash)
+    return(salt+passwordHash).decode("ascii")
+
+def verifyPassword(s,p):
+    salt = s[:64]
+    s = s[64:]
+    passwordHash = hashlib.pbkdf2_hmac("sha256",p.encode("utf-8"),salt.encode("ascii"),100000)
+    passwordHash = binascii.hexlify(passwordHash).decode("ascii")
+    return passwordHash == s
+
     
 
 class Admin():
@@ -67,7 +95,7 @@ class Admin():
 
     def adminUI(self):
         pass
-    
+
     def addItem(self):
         while True:
             command = input("What item would you like to add to the database?\n1.)Scan item\n2.)Book\n3.)Dvd\n4.)Cd\nb)Back\n>>").lower().strip(" ")
@@ -85,17 +113,43 @@ class Admin():
                 print("||That is not a command||")
     def removeItem(self):
         pass
-    def createAdmin(self):
-        pass
-    def createUser(self):
+    def createAdmin():
         firstName = input("First name:")
         lastName = input("Last name:")
         keyCode = generateKeyCode()
         userId = generateUserId()
+        password = input("Password:")
+        password = hashingPassword(password)
+        cur.execute("INSERT INTO admins (id, firstname, lastname, keycode, password) VALUES (?, ?, ?, ? ,?)",(userId,firstName,lastName,str(keyCode),password))
+        con.commit()
+        print("Admin {} {} {} {} Created".format(userId, firstName, lastName, keyCode))
+
+        
+    def createUser():
+        firstName = input("First name:")
+        lastName = input("Last name:")
+        keyCode = generateKeyCode()
+        userId = generateUserId()
+        cur.execute("INSERT INTO users (id, firstname, lastname, keycode) VALUES (?, ?, ?, ?)",(userId,firstName,lastName,str(keyCode)))
+        con.commit()
+        print("User {} {} {} {} Created".format(userId,firstName,lastName,str(keyCode)))
+
+    def deleteAdmin():
+        while True:
+            keyCode = input("||Type b to go back||Key code:").lower().strip(" ")
+            if keyCode == "b":
+                break
+            elif checkForKeyCodeAdmins(keyCode) == True:
+                cur.execute("DELETE FROM admins WHERE keycode=?",(str(keyCode),))
+                print("Admin deleted")
+                break
+
     def seeAllAcounts(self):
         pass
+    
     def seeRecentLogs(self):
         pass
+    
     def login(self):
         pass
 
@@ -105,7 +159,7 @@ class User():
         self.lastname = ""
         self.keycode = ""
         self.id = ""
-        
+
     def takeItemOut(self):
         pass
     def takeItemsBack(self):
