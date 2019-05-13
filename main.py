@@ -54,20 +54,16 @@ def checkForKeyCode(r,table):
         return True
 
 def getKeyCode(di):
-    
-
+    with open(di,"r") as data:
+        reader = csv.reader(data)
+        for row in reader:
+            print()
 
 def generateKeyCode():
     while True:
         randomKey = random.randint(0,999999999)
         if checkForKeyCode(randomKey,"users") == False and checkForKeyCode(randomKey,"admins") == False:
             return randomKey
-
-def generateId(table):
-    cur.execute('SELECT MAX(id) FROM '+table)
-    data = cur.fetchall()
-    userId = (data[0][0]) + 1
-    return userId
 
 def hashingPassword(p):
     salt = hashlib.sha256(os.urandom(60)).hexdigest().encode("ascii")
@@ -98,8 +94,15 @@ class User:
         pass
     def userUI(self):
         pass
+    def getDetails(self):
+        pass
 class Student(User):
-    pass
+    def __init__(self):
+        pass
+
+class Teacher(User):
+    def __init__(self):
+        pass
 
 class Admin(User):
     def __init__(self):
@@ -125,17 +128,26 @@ class Admin(User):
                 break
             else:
                 print("||That is not a command||")
-    def createUser(keyCode,firstName,lastName,staff,admin,pin):
-        cur.execute("INSERT INTO users (keycode, firstname, lastname, staff, admin, pin) VALUES (?, ?, ?, ?, ?, ?)",(keyCode,firstName,lastName,staff,admin,pin)
+                
+    def createUser(staff,admin,pin):
+        keyCode = generateKeyCode()
+        firstName = input("First Name:")
+        lastName = input("Last Name:")
+        cur.execute("INSERT INTO users (keycode, firstname, lastname, staff, admin, pin) VALUES (?, ?, ?, ?, ?, ?)",(keyCode,firstName,lastName,staff,admin,pin))
         con.commit()
         print("User {} {} {} Created".format(keyCode,firstName,lastName))
 
     def createStudent():
-        keyCode = 
+        createUser(False,False,"")
+        
     def createTeacher():
-        pass
+        createUser(True,False,"")
+        
     def createAdmin():
-        pass
+        password = input("Password:")
+        password =hashingPassword(password)
+        createUser(False,True,password)
+        
     def seeAllAccounts(table):
         cur.execute('SELECT * FROM '+table)
         data = cur.fetchall()
@@ -182,8 +194,5 @@ def login():
         else :
             print("||That is not a command||")
 
-
-def d(d):
-    return random.randint(1,d)
 
 #login()
