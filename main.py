@@ -1,78 +1,73 @@
 import tkinter as t
-import datetime as d
+import datetime
 import sqlite3 as s
 from sqlite3 import Error
-import hashlib, binascii , os ,random
+import hashlib, binascii , os ,random ,CSV
 #https://stackabuse.com/a-sqlite-tutorial-with-python/
 con = s.connect("dbFile.db")
 cur = con.cursor()
 
+
+#key code is imported from a CSV
+
 usertable = """ CREATE TABLE users (
-            id integer PRIMARY KEY,
+            keycode integer PRIMARY KEY,
             firstName text NOT NULL,
             lastName text NOT NULL,
-            keycode text NOT NULL
-        ) """
-admintable ="""CREATE TABLE admins (
-            id integer PRIMARY KEY,
-            firstName text NOT NULL,
-            lastName text NOT NULL,
-            keycode text NOT NULL,
-            password text NOT NULL
+            staff bit,
+            admin bit,
+            pin text NOT NULL
         ) """
 booktable = """ CREATE TABLE books (
-            id integer PRIMARY KEY,
+            uid integer PRIMARY KEY,
             name text NOT NULL,
             author text NOT NULL,
             takenout bit
         )"""
-dvdtable = """CREATE TABLE dvds(
-            id integer PRIMARY KEY,
-            name text NOT NULL,
-            creator text NOT NULL,
-            takenout bit
-        ) """
+##dvdtable = """CREATE TABLE dvds(
+##            id integer PRIMARY KEY,
+##            name text NOT NULL,
+##            creator text NOT NULL,
+##            takenout bit
+##        ) """
+##
+##cdtable = """CREATE TABLE cds(
+##            id integer PRIMARY KEY,
+##            name text NOT NULL,
+##            producer text NOT NULL,
+##            takenout bit
+##        )"""
 
-cdtable = """CREATE TABLE cds(
-            id integer PRIMARY KEY,
-            name text NOT NULL,
-            producer text NOT NULL,
-            takenout bit
-        )"""
+def logTask(logMessage,user):
+    with open("logs.txt","r+") as data:
+        data.write(str(datetime.datetime),"||",str(user),"||",logMessage)
+    print("~~Task Logged~~")
 
-def checkForKeyCodeUsers(r):
-    cur.execute('SELECT keycode FROM users WHERE keycode='+str(r))
-    data =cur.fetchall()
+def checkForKeyCode(r,table):
+    cur.execute('SELECT keycode FROM '+table+' WHERE keycode='+str(r))
+    data = cur.fetchall()
     if not data:
-        print("key does not match keycodes :)")
+        print("key does not match keycodes")
         return False
     else:
-        print("key already exists :(")
+        print("key already exists")
         return True
 
-def checkForKeyCodeAdmins(r):
-    cur.execute('SELECT keycode FROM admins WHERE keycode='+str(r))
-    data =cur.fetchall()
-    if not data:
-        print("key does not match keycodes :)")
-        return False
-    else:
-        print("key already exists :(")
-        return True
+def getKeyCode(di):
+    
+
 
 def generateKeyCode():
     while True:
         randomKey = random.randint(0,999999999)
-        if checkForKeyCodeUsers(randomKey) == False and checkForKeyCodeAdmins(randomKey) == False:
+        if checkForKeyCode(randomKey,"users") == False and checkForKeyCode(randomKey,"admins") == False:
             return randomKey
 
-def generateUserId():
-    cur.execute('SELECT MAX(id) FROM users')
+def generateId(table):
+    cur.execute('SELECT MAX(id) FROM '+table)
     data = cur.fetchall()
     userId = (data[0][0]) + 1
     return userId
-def generateAdminId():
-    cur.execute
 
 def hashingPassword(p):
     salt = hashlib.sha256(os.urandom(60)).hexdigest().encode("ascii")
@@ -87,14 +82,33 @@ def verifyPassword(s,p):
     passwordHash = binascii.hexlify(passwordHash).decode("ascii")
     return passwordHash == s
 
-    
 
-class Admin():
+class User:
     def __init__(self):
-        self.name = ""
+        self.firstname = ""
+        self.lastname = ""
+        self.keycode = ""
+        self.id = ""
 
-    def adminUI(self):
+    def takeItemOut(self):
         pass
+    def takeItemsBack(self):
+        pass
+    def searchItems(self):
+        pass
+    def userUI(self):
+        pass
+class Student(User):
+    pass
+
+class Admin(User):
+    def __init__(self):
+        self.password = ""
+        
+    def adminUI(self):
+        print("~~ WELCOME TO DONCASTER UNIVERSITY LIBRARY ~~")
+        while True:
+            command = input("1.)Take Out Item\n2.)Put Item Back\n3.)Search Items\n4.)")
 
     def addItem(self):
         while True:
@@ -111,61 +125,40 @@ class Admin():
                 break
             else:
                 print("||That is not a command||")
-    def removeItem(self):
+    def createUser(keyCode,firstName,lastName,staff,admin,pin):
+        cur.execute("INSERT INTO users (keycode, firstname, lastname, staff, admin, pin) VALUES (?, ?, ?, ?, ?, ?)",(keyCode,firstName,lastName,staff,admin,pin)
+        con.commit()
+        print("User {} {} {} Created".format(keyCode,firstName,lastName))
+
+    def createStudent():
+        keyCode = 
+    def createTeacher():
         pass
     def createAdmin():
-        firstName = input("First name:")
-        lastName = input("Last name:")
-        keyCode = generateKeyCode()
-        userId = generateUserId()
-        password = input("Password:")
-        password = hashingPassword(password)
-        cur.execute("INSERT INTO admins (id, firstname, lastname, keycode, password) VALUES (?, ?, ?, ? ,?)",(userId,firstName,lastName,str(keyCode),password))
-        con.commit()
-        print("Admin {} {} {} {} Created".format(userId, firstName, lastName, keyCode))
+        pass
+    def seeAllAccounts(table):
+        cur.execute('SELECT * FROM '+table)
+        data = cur.fetchall()
+        return data
 
-        
-    def createUser():
-        firstName = input("First name:")
-        lastName = input("Last name:")
-        keyCode = generateKeyCode()
-        userId = generateUserId()
-        cur.execute("INSERT INTO users (id, firstname, lastname, keycode) VALUES (?, ?, ?, ?)",(userId,firstName,lastName,str(keyCode)))
-        con.commit()
-        print("User {} {} {} {} Created".format(userId,firstName,lastName,str(keyCode)))
-
-    def deleteAdmin():
+    def removeUser(self,table):
+        print(self.seeAllAccounts(table))
         while True:
-            keyCode = input("||Type b to go back||Key code:").lower().strip(" ")
+            keyCode = input("||Type b to go back||\nKey code:")
             if keyCode == "b":
                 break
-            elif checkForKeyCodeAdmins(keyCode) == True:
-                cur.execute("DELETE FROM admins WHERE keycode=?",(str(keyCode),))
+            elif checkForKeyCode(keyCode,table) == True:
+                cur.execute("DELETE FROM ? WHERE keycode=?",(table,str(keyCode)))
                 print("Admin deleted")
                 break
-
-    def seeAllAcounts(self):
-        pass
-    
+            else:
+                print("||Invalid Input||")
+        
     def seeRecentLogs(self):
         pass
     
-    def login(self):
-        pass
 
-class User():
-    def __init__(self):
-        self.firstname = ""
-        self.lastname = ""
-        self.keycode = ""
-        self.id = ""
 
-    def takeItemOut(self):
-        pass
-    def takeItemsBack(self):
-        pass
-    def searchItems(self):
-        pass
 
 #Login function to log into the system
 def login():
@@ -175,18 +168,22 @@ def login():
             print("||Key Card is currently unavailable||")
         elif command == "2":
             keyCode = input("Enter Key Code:")
-            try:
-                data = cur.execute('SELECT keycode FROM users WHERE keycode='+keyCode)
-            except s.OperationalError:
-                print("||Key code doesnt exist||\n")
+            if checkForKeyCode(keyCode,"users") == True:
+                pass
+            else:
+                print("||Key Code doesnt Exist||")
+            
         elif command == "3":
-            pass
+            keyCode = input("Enter Key Code:")
+            if checkForKeyCode(keyCode,"admins") == True:
+                pass
         elif command == "b":
             break
         else :
             print("||That is not a command||")
 
 
-
+def d(d):
+    return random.randint(1,d)
 
 #login()
