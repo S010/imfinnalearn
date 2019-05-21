@@ -17,8 +17,7 @@ usertable = """ CREATE TABLE users (
             keycode integer PRIMARY KEY,
             firstName text NOT NULL,
             lastName text NOT NULL,
-            staff bit,
-            admin bit,
+            userType integer
             pin text NOT NULL
         ) """
 booktable = """ CREATE TABLE books (
@@ -27,6 +26,17 @@ booktable = """ CREATE TABLE books (
             author text NOT NULL,
             takenout bit
         )"""
+
+def deleteDatabase(database):
+    cur.execute("DROP TABLE",database)
+    con.commit()
+    
+
+def createDatabase(command):
+    cur.execute(command)
+    con.commit()
+
+
 ##dvdtable = """CREATE TABLE dvds(
 ##            id integer PRIMARY KEY,
 ##            name text NOT NULL,
@@ -83,8 +93,8 @@ def hashingPassword(p):
     passwordHash = binascii.hexlify(passwordHash)
     return(salt+passwordHash).decode("ascii")
 
-#what is s and what is p wtf. ? like ik what this is meant to do but does it do
-#it?? looks like a fucked up version of the function above.
+#s = hashedPassword from hashingPasword , p = password to check against/password
+#This function checks if a hashedpassword is the same as a string, returns a boolean value
 def verifyPassword(s,p):
     salt = s[:64]
     s = s[64:]
@@ -126,52 +136,15 @@ class Admin(User):
     def __init__(self):
         self.password = ""
 
-    #basic ui for the admin
-    def adminUI(self):
-        print("~~ WELCOME TO DONCASTER UNIVERSITY LIBRARY ~~")
-        while True:
-            command = input("1.)Take Out Item\n2.)Put Item Back\n3.)Search Items\n4.)")
-
-    #right now this asks for a command and if it is 1, it says "||Scans can not
-    #be produced at the moment||" ? pretty sick tbh
-    def addItem(self):
-        while True:
-            command = input("What item would you like to add to the database?\n1.)Scan item\n2.)Book\n3.)Dvd\n4.)Cd\nb)Back\n>>").lower().strip(" ")
-            if command == "1":
-                print("||Scans can not be produced at the moment||")
-            elif command == "2":
-                pass
-            elif command == "3":
-                pass
-            elif command == "4":
-                pass
-            elif command == "b":
-                break
-            else:
-                print("||That is not a command||")
-
     #creates a user object using a boolean for staff and admin and an integer
-    #for pin its pin
-    def createUser(staff,admin,pin):
+    #for pin its pin ,WHEN PROGRAMMING FOR USER MAKE PIN "" since the user has no password
+    def createUser(userType,pin):
         keyCode = generateKeyCode()
         firstName = input("First Name:")
         lastName = input("Last Name:")
-        cur.execute("INSERT INTO users (keycode, firstname, lastname, staff, admin, pin) VALUES (?, ?, ?, ?, ?, ?)",(keyCode,firstName,lastName,staff,admin,pin))
+        cur.execute("INSERT INTO users (keycode, firstName, lastName, userType, pin) VALUES (?, ?, ?, ?, ?)",(keyCode,firstName,lastName,userType,pin))
         con.commit()
         print("User {} {} {} Created".format(keyCode,firstName,lastName))
-
-    #these are self explanatory but really weird ngl.
-    def createStudent():
-        createUser(False,False,"")
-
-    def createTeacher():
-        createUser(True,False,"")
-
-    #wait all users dont have passwords??? i feel they all should?
-    def createAdmin():
-        password = input("Password:")
-        password =hashingPassword(password)
-        createUser(False,True,password)
 
     #returns all data in a specific table.
     def seeAllAccounts(table):
@@ -195,6 +168,60 @@ class Admin(User):
 
     def seeRecentLogs(self):
         pass
+        
+    #right now this asks for a command and if it is 1, it says "||Scans can not
+    #be produced at the moment||" ? pretty sick tbh , will add nore when more is added
+    def addItemUI(self):
+        while True:
+            command = input("What item would you like to add to the database?\n1.)Scan item\n2.)Book\n3.)Dvd\n4.)Cd\nb)Back\n>>").lower().strip(" ")
+            if command == "1":
+                print("||Scans can not be produced at the moment||")
+            elif command == "2":
+                pass
+            elif command == "3":
+                pass
+            elif command == "4":
+                pass
+            elif command == "b":
+                break
+            else:
+                print("||That is not a command||")
+
+    def addUserUI(self):
+        while True:
+            command = input("What type of user would you like to create?\n1.)Student\n2.)Teacher\n3.)Admin\nBack\n>>").lower().strip(" ")
+            if command == "1":
+                createUser(0,"")
+            elif command == "2":
+                createUser(1,"")
+            elif command == "3":
+                password = input("Password:")
+                password =hashingPassword(password)
+                createUser(2,password)
+            elif command == "b":
+                break
+            else:
+                print("||That is not a command||")
+
+    #basic ui for the admin
+    def adminUI(self):
+        print("~~ WELCOME TO DONCASTER UNIVERSITY LIBRARY ~~")
+        while True:
+            command = input("1.)Take Out Item\n2.)Put Item Back\n3.)Search Items\n4.)Add users\nb.)Back").lower().strip(" ")
+            if command == "1":
+                pass
+            elif command == "2":
+                #addItemUI()
+                pass
+            elif command == "3":
+                pass
+            elif command == "4":
+                pass
+            elif command == "b":
+                break
+            else:
+                print("||That is not a command||")
+
 
 
 
@@ -203,20 +230,16 @@ class Admin(User):
 #keycode is valid.
 def login():
     while True:
-        command = input("Select which method of sign in you would like -\n1.)Scan Card\n2.)Enter Key Code\n3.)Sign in as admin\nb.)Back\n>>").lower().strip(" ")
+        command = input("Select which method of sign in you would like -\n1.)Scan Card\n2.)Enter Key Code\nb.)Back\n>>").lower().strip(" ")
         if command == "1":
             print("||Key Card is currently unavailable||")
         elif command == "2":
             keyCode = input("Enter Key Code:")
             if checkForKeyCode(keyCode,"users") == True:
-                pass
+                cur.execute("SELECT keycode FROM users WHERE userType=0 AND WHERE keycode=",keycode)
+                
             else:
                 print("||Key Code doesnt Exist||")
-
-        elif command == "3":
-            keyCode = input("Enter Key Code:")
-            if checkForKeyCode(keyCode,"admins") == True:
-                pass
         elif command == "b":
             break
         else :
