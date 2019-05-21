@@ -2,10 +2,13 @@
 
 ![alt text][logo]
 <h2>Table of Contents</h2>
-[Info](https://github.com/S010/imfinnalearn#info "Info")
-[Problem Statement](https://github.com/S010/imfinnalearn#problem-statement "Problem Statement")
-[Questionnaire](https://github.com/S010/imfinnalearn#questionnaire "Questionnaire")
-[System Requirements](https://github.com/S010/imfinnalearn#system-requirements "System Requirements")
+<ul>
+  <li><a href="https://github.com/S010/imfinnalearn#info">Info</a></li>
+  <li><a href="https://github.com/S010/imfinnalearn#problem-statement">Problem Statement</a></li>
+  <li><a href="https://github.com/S010/imfinnalearn#questionnaire">Questionnaire</a></li>
+  <li><a href="https://github.com/S010/imfinnalearn#system-requirements">System Requirements</a></li>
+</ul>
+
 <h2>Info</h2>
 ImFinnaLearn is a libary software by Jacob Morgan , Charlie Grimshaw and Jack Crawshaw. As a school project we have been tasked with creating a libary software for a fictional university, since the current software in the university is slow and unresponsive.
 <h2>Problem Statement</h2>
