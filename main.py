@@ -58,7 +58,7 @@ def checkForKeyCode(r,table):
         print("key already exists")
         return True
 
-#???? print()?
+#???? print()? *Jacob - I dont know how to do this or what the file format is gonna look like so i just gave up
 def getKeyCode(di):
     with open(di,"r") as data:
         reader = csv.reader(data)
