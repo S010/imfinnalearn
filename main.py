@@ -17,24 +17,17 @@ usertable = """ CREATE TABLE users (
             keycode integer PRIMARY KEY,
             firstName text NOT NULL,
             lastName text NOT NULL,
-            userType integer
+            userType integer,
             pin text NOT NULL
         ) """
-booktable = """ CREATE TABLE books (
+itemtable = """ CREATE TABLE items (
             uid integer PRIMARY KEY,
-            name text NOT NULL,
+            title text NOT NULL,
             author text NOT NULL,
-            takenout bit
+            takenout integer,
+            takenoutby text NOT NULL
         )"""
 
-def deleteDatabase(database):
-    cur.execute("DROP TABLE",database)
-    con.commit()
-    
-
-def createDatabase(command):
-    cur.execute(command)
-    con.commit()
 
 
 ##dvdtable = """CREATE TABLE dvds(
@@ -50,6 +43,26 @@ def createDatabase(command):
 ##            producer text NOT NULL,
 ##            takenout bit
 ##        )"""
+
+
+#Checks the users userType and returns the usersdata in the form of a userclass
+def returnUserInfo(keyCode):
+    for i in range(3):
+        cur.execute("SELECT * FROM users WHERE userType=? AND keycode=?",(i,keyCode))
+        data = cur.fetchall()
+        if not data:
+            print("User type is not "+str(i))
+        else:
+            print("User type is "+str(i))
+            if i == 0:
+                user = Student(data[0][1],data[0][2],data[0][0],data[0][3],data[0][4])
+            elif i == 1:
+                user = Teacher(data[0][1],data[0][2],data[0][0],data[0][3],data[0][4])
+            elif i == 2:
+                user = Admin(data[0][1],data[0][2],data[0][0],data[0][3],data[0][4])
+            break
+    return user
+    
 
 #logs a task done by a specific user in file "logs.txt"
 def logTask(logMessage,user):
@@ -68,22 +81,36 @@ def checkForKeyCode(r,table):
         print("key already exists")
         return True
 
+def checkForUID(uid):
+    cur.execute('SELECT uid FROM items WHERE uid='+str(uid))
+    data = cur.fetchall()
+    if not data:
+        print("UID doesnt exist")
+        return False
+    else:
+        print("UID already exists")
+        return True
+
+
+
+
 #???? print()? *Jacob - I dont know how to do this or what the file format is gonna look like so i just gave up
 def getKeyCode(di):
     with open(di,"r") as data:
         reader = csv.reader(data)
         for row in reader:
             print()
-
+            
 # makes a keycode (0-999999999), checks if it exists, if not returns it.
 def generateKeyCode():
     while True:
         print("while true")
         randomKey = random.randint(0,999999999)
         print("creates key")
-        if checkForKeyCode(randomKey,"users") == False and checkForKeyCode(randomKey,"admins") == False:
+        if checkForKeyCode(randomKey,"users") == False:
             print("if statement")
             return randomKey
+
 
 #creates a salted hash of p, why the swap from sha256 for the salt to
 #pbkdf2_hmac for the hash???
@@ -105,37 +132,58 @@ def verifyPassword(s,p):
 #user class
 class User:
     #initializes to create variables for name, keycode and id
-    def __init__(self):
-        self.firstname = ""
-        self.lastname = ""
-        self.keycode = ""
-        self.id = ""
-
+    def __init__(self,firstname,lastname,keycode,userType,password):
+        self.firstname = firstname
+        self.lastname = lastname
+        self.keycode = keycode
+        self.userType = userType
+        self.userType = password
+        self.name = self.firstname+" "+self.lastname
     def takeItemOut(self):
         pass
     def takeItemsBack(self):
         pass
     def searchItems(self):
         pass
-    def userUI(self):
-        pass
     def getDetails(self):
         pass
 
 #student class, inherits User.
 class Student(User):
-    def __init__(self):
-        pass
+    def UI(self):
+        print("student ui")
 #teacher class, inherits User.
 class Teacher(User):
-    def __init__(self):
-        pass
+    def UI(self):
+        print("teacher ui")
 
 #admin class, inherits User.
 class Admin(User):
-    def __init__(self):
-        self.password = ""
+    def __init__(self,password):
+        self.password = password
 
+    def addItem(self):
+        uid = input("Enter UID:")
+        title = input("Enter title:")
+        author = input("Enter author:")
+        takenOut = 0
+        takenOutBy = ""
+        cur.execute("INSERT INTO items (uid, title, author, takenout, takenoutby) VALUES (?, ?, ?, ?, ?)",(uid,title,author,takenOut,takenOutBy))
+        con.commit()
+        print("Item {} , {} , by {}".format(uid,title,author))
+        
+    def removeItem(self):
+        while True:
+            uid = input("||Type b to go back||\nUID:").lower().strip(" ")
+            if keyCode == "b":
+                break
+            elif checkForUID(uid) == True:
+                cur.execute("DELETE FROM items WHERE uid="+uid)
+                print("Item deleted")
+                break
+            else:
+                print("||Invalid Input||")
+                
     #creates a user object using a boolean for staff and admin and an integer
     #for pin its pin ,WHEN PROGRAMMING FOR USER MAKE PIN "" since the user has no password
     def createUser(userType,pin):
@@ -156,12 +204,12 @@ class Admin(User):
     def removeUser(self,table):
         print(self.seeAllAccounts(table))
         while True:
-            keyCode = input("||Type b to go back||\nKey code:")
+            keyCode = input("||Type b to go back||\nKey code:").lower().strip(" ")
             if keyCode == "b":
                 break
             elif checkForKeyCode(keyCode,table) == True:
-                cur.execute("DELETE FROM ? WHERE keycode=?",(table,str(keyCode)))
-                print("Admin deleted")
+                cur.execute("DELETE FROM users WHERE keycode="+keyCode)
+                print("User deleted")
                 break
             else:
                 print("||Invalid Input||")
@@ -204,7 +252,7 @@ class Admin(User):
                 print("||That is not a command||")
 
     #basic ui for the admin
-    def adminUI(self):
+    def UI(self):
         print("~~ WELCOME TO DONCASTER UNIVERSITY LIBRARY ~~")
         while True:
             command = input("1.)Take Out Item\n2.)Put Item Back\n3.)Search Items\n4.)Add users\nb.)Back").lower().strip(" ")
@@ -222,22 +270,18 @@ class Admin(User):
             else:
                 print("||That is not a command||")
 
-
-
-
-
 #Login function to log into the system, currently just checks to see if
 #keycode is valid.
 def login():
     while True:
         command = input("Select which method of sign in you would like -\n1.)Scan Card\n2.)Enter Key Code\nb.)Back\n>>").lower().strip(" ")
         if command == "1":
-            print("||Key Card is currently unavailable||")
+            print("||Scanner is currently unavailable||")
         elif command == "2":
             keyCode = input("Enter Key Code:")
             if checkForKeyCode(keyCode,"users") == True:
-                cur.execute("SELECT keycode FROM users WHERE userType=0 AND WHERE keycode=",keycode)
-                
+                user = returnUserInfo(keyCode)
+                user.UI()
             else:
                 print("||Key Code doesnt Exist||")
         elif command == "b":
