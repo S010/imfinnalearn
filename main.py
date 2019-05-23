@@ -50,6 +50,14 @@ def returnUserInfo(keyCode):
             break
     return user
 
+def deleteDatabase(database):
+    cur.execute("DROP TABLE",database)
+    con.commit()
+
+
+def createDatabase(command):
+    cur.execute(command)
+    con.commit()
 
 #logs a task done by a specific user in file "logs.txt"
 def logTask(logMessage,user):
@@ -269,6 +277,7 @@ def login():
             if checkForKeyCode(keyCode,"users") == True:
                 user = returnUserInfo(keyCode)
                 user.UI()
+                cur.execute("SELECT keycode FROM users WHERE userType=0 AND WHERE keycode=",keycode)
             else:
                 print("||Key Code doesnt Exist||")
         elif command == "b":
