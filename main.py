@@ -24,26 +24,13 @@ itemtable = """ CREATE TABLE items (
             uid integer PRIMARY KEY,
             title text NOT NULL,
             author text NOT NULL,
-            takenout integer,
-            takenoutby text NOT NULL
         )"""
 
-
-
-##dvdtable = """CREATE TABLE dvds(
-##            id integer PRIMARY KEY,
-##            name text NOT NULL,
-##            creator text NOT NULL,
-##            takenout bit
-##        ) """
-##
-##cdtable = """CREATE TABLE cds(
-##            id integer PRIMARY KEY,
-##            name text NOT NULL,
-##            producer text NOT NULL,
-##            takenout bit
-##        )"""
-
+takenItemsTable = """ CREATE TABLE items (
+    takenID integer INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
+    FOREIGN KEY (keycode) REFERENCES users(keycode)
+    FOREIGN KEY (uid) REFERENCES itmes(uid)
+)"""
 
 #Checks the users userType and returns the usersdata in the form of a userclass
 def returnUserInfo(keyCode):
@@ -62,7 +49,7 @@ def returnUserInfo(keyCode):
                 user = Admin(data[0][1],data[0][2],data[0][0],data[0][3],data[0][4])
             break
     return user
-    
+
 
 #logs a task done by a specific user in file "logs.txt"
 def logTask(logMessage,user):
@@ -100,7 +87,7 @@ def getKeyCode(di):
         reader = csv.reader(data)
         for row in reader:
             print()
-            
+
 # makes a keycode (0-999999999), checks if it exists, if not returns it.
 def generateKeyCode():
     while True:
@@ -171,7 +158,7 @@ class Admin(User):
         cur.execute("INSERT INTO items (uid, title, author, takenout, takenoutby) VALUES (?, ?, ?, ?, ?)",(uid,title,author,takenOut,takenOutBy))
         con.commit()
         print("Item {} , {} , by {}".format(uid,title,author))
-        
+
     def removeItem(self):
         while True:
             uid = input("||Type b to go back||\nUID:").lower().strip(" ")
@@ -183,7 +170,7 @@ class Admin(User):
                 break
             else:
                 print("||Invalid Input||")
-                
+
     #creates a user object using a boolean for staff and admin and an integer
     #for pin its pin ,WHEN PROGRAMMING FOR USER MAKE PIN "" since the user has no password
     def createUser(userType,pin):
@@ -216,7 +203,7 @@ class Admin(User):
 
     def seeRecentLogs(self):
         pass
-        
+
     #right now this asks for a command and if it is 1, it says "||Scans can not
     #be produced at the moment||" ? pretty sick tbh , will add nore when more is added
     def addItemUI(self):
