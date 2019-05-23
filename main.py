@@ -30,7 +30,7 @@ booktable = """ CREATE TABLE books (
 def deleteDatabase(database):
     cur.execute("DROP TABLE",database)
     con.commit()
-    
+
 
 def createDatabase(command):
     cur.execute(command)
@@ -168,7 +168,7 @@ class Admin(User):
 
     def seeRecentLogs(self):
         pass
-        
+
     #right now this asks for a command and if it is 1, it says "||Scans can not
     #be produced at the moment||" ? pretty sick tbh , will add nore when more is added
     def addItemUI(self):
@@ -237,7 +237,7 @@ def login():
             keyCode = input("Enter Key Code:")
             if checkForKeyCode(keyCode,"users") == True:
                 cur.execute("SELECT keycode FROM users WHERE userType=0 AND WHERE keycode=",keycode)
-                
+
             else:
                 print("||Key Code doesnt Exist||")
         elif command == "b":
