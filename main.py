@@ -2,114 +2,28 @@ import tkinter as t
 import datetime
 import sqlite3 as s
 from sqlite3 import Error
-import hashlib, binascii , os ,random ,csv
+import hashlib, binascii, os, random, csv
+
 #https://stackabuse.com/a-sqlite-tutorial-with-python/
 con = s.connect("dbFile.db")
 cur = con.cursor()
 
 
-#key code is imported from a CSV
-
-usertable = """ CREATE TABLE users (
-            keycode integer PRIMARY KEY,
-            firstName text NOT NULL,
-            lastName text NOT NULL,
-            userType integer,
-            pin text NOT NULL
-        ) """
-itemtable = """ CREATE TABLE items (
-            uid integer PRIMARY KEY,
-            title text NOT NULL,
-            author text NOT NULL,
-        )"""
-
-takenItemsTable = """ CREATE TABLE items (
-    takenID integer INTEGER NOT NULL PRIMARY KEY AUTOINCREMENT UNIQUE,
-    FOREIGN KEY (keycode) REFERENCES users(keycode)
-    FOREIGN KEY (uid) REFERENCES itmes(uid)
-)"""
-
 #Checks the users userType and returns the usersdata in the form of a userclass
 def returnUserInfo(keyCode):
-    for i in range(3):
-        cur.execute("SELECT * FROM users WHERE userType=? AND keycode=?",(i,keyCode))
-        data = cur.fetchall()
-        if not data:
-            print("User type is not "+str(i))
-        else:
-            print("User type is "+str(i))
-            if i == 0:
-                user = Student(data[0][1],data[0][2],data[0][0],data[0][3],data[0][4])
-            elif i == 1:
-                user = Teacher(data[0][1],data[0][2],data[0][0],data[0][3],data[0][4])
-            elif i == 2:
-                user = Admin(data[0][1],data[0][2],data[0][0],data[0][3],data[0][4])
-            break
-    return user
+    cur.execute("SELECT * FROM users WHERE keycode =?", (keyCode,))
+    info = cur.fetchone()
+    return(info)
 
-def deleteDatabase(database):
-    cur.execute("DROP TABLE",database)
+def deleteTable(table):
+    cur.execute("DROP TABLE "+ table)
     con.commit()
 
-
-def createDatabase(command):
-    cur.execute(command)
-    con.commit()
-
+#what is this for my dude?
 def logTask(logMessage,user):
     with open("logs.txt","r+") as data:
         data.write(str(datetime.datetime),"||",str(user),"||",logMessage)
     print("~~Task Logged~~")
-
-def checkForKeyCode(r,table):
-    cur.execute('SELECT keycode FROM '+table+' WHERE keycode='+str(r))
-    data = cur.fetchall()
-    if not data:
-        print("key does not match keycodes")
-        return False
-    else:
-        print("key already exists")
-        return True
-
-
-def checkForUID(uid):
-    cur.execute('SELECT uid FROM items WHERE uid='+str(uid))
-    data = cur.fetchall()
-    if not data:
-        print("UID doesnt exist")
-        return False
-    else:
-        print("UID already exists")
-        return True
-
-
-
-
-#???? print()? *Jacob - I dont know how to do this or what the file format is gonna look like so i just gave up
-
-
-def getKeyCode(di):
-    with open(di,"r") as data:
-        reader = csv.reader(data)
-        for row in reader:
-            print()
-
-def generateKeyCode():
-    while True:
-        randomKey = random.randint(0,999999999)
-
-        print("creates key")
-        if checkForKeyCode(randomKey,"users") == False:
-            print("if statement")
-            return randomKey
-
-
-#creates a salted hash of p, why the swap from sha256 for the salt to
-#pbkdf2_hmac for the hash???
-
-        if checkForKeyCode(randomKey,"users") == False and checkForKeyCode(randomKey,"admins") == False:
-            return randomKey
-
 
 def hashingPassword(p):
     salt = hashlib.sha256(os.urandom(60)).hexdigest().encode("ascii")
@@ -315,9 +229,6 @@ class Admin(User):
 
 #Login function to log into the system, currently just checks to see if
 #keycode is valid.
-
-#Login function to log into the system
-
 def login():
     while True:
         command = input("Select which method of sign in you would like -\n1.)Scan Card\n2.)Enter Key Code\nb.)Back\n>>").lower().strip(" ")
@@ -343,5 +254,5 @@ def login():
         else :
             print("||That is not a command||")
 
-
+deleteTable("users")
 #login()
