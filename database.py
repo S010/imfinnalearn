@@ -1,7 +1,19 @@
+"""
+Database module.
+
+Used for interacting with the library database.
+"""
+
 import sqlite3 as sql
+"""
+sqlite3 module.
+
+For use of a SQLite3 Database to store information.
+"""
 
 
 class LibDb(object):
+
     def __init__(self):
         self.con = sql.connect("dbFile.db")
         self.cur = self.con.cursor()
@@ -39,9 +51,9 @@ class LibDb(object):
         self.con.commit()
 
     def delUser(self, keycode):
-        self.cur.execute(""" DELETE FROM users WHERE keycode = ? """,
-                         (keycode))
+        self.cur.execute(""" DELETE FROM users WHERE keycode=? """,
+                         (keycode,))
+        self.con.commit()
 
 
 db = LibDb()
-db.addUser(126, "charlie", 2, "willy123")

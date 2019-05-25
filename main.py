@@ -119,7 +119,7 @@ class Admin(User):
                 break
             else:
 
-                print("||Invalid Input||")
+                print("||Invalid Input||") 
 
     #creates a user object using a boolean for staff and admin and an integer
     #for pin its pin ,WHEN PROGRAMMING FOR USER MAKE PIN "" since the user has no password
