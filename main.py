@@ -2,7 +2,7 @@ import tkinter as t
 import datetime
 import sqlite3 as s
 from sqlite3 import Error
-import hashlib, binascii , os ,random 
+import hashlib, binascii , os ,random
 import database
 
 #https://stackabuse.com/a-sqlite-tutorial-with-python/
@@ -26,8 +26,6 @@ def returnUserInfo(keyCode):
                 user = Admin(data[0][1],data[0][2],data[0][0],data[0][3],data[0][4])
             break
     return user
-
-
 
 def logTask(logMessage,user):
     with open("logs.txt","r+") as data:
@@ -75,7 +73,6 @@ def generateKeyCode():
 #pbkdf2_hmac for the hash???
         if checkForKeyCode(randomKey,"users") == False and checkForKeyCode(randomKey,"admins") == False:
             return randomKey
-
 
 def hashingPassword(p):
     salt = hashlib.sha256(os.urandom(60)).hexdigest().encode("ascii")
