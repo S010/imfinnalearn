@@ -4,10 +4,11 @@ import sqlite3 as s
 from sqlite3 import Error
 import hashlib, binascii , os ,random
 import database
-
+import user
 #https://stackabuse.com/a-sqlite-tutorial-with-python/
 cur = database.db.cur
 con = database.db.con
+
 
 #Checks the users userType and returns the usersdata in the form of a userclass
 def returnUserInfo(keyCode):
@@ -19,11 +20,11 @@ def returnUserInfo(keyCode):
         else:
             print("User type is "+str(i))
             if i == 0:
-                user = Student(data[0][1],data[0][2],data[0][0],data[0][3],data[0][4])
+                user = user.Student(data[0][1],data[0][2],data[0][0],data[0][3],data[0][4])
             elif i == 1:
-                user = Teacher(data[0][1],data[0][2],data[0][0],data[0][3],data[0][4])
+                user = user.Teacher(data[0][1],data[0][2],data[0][0],data[0][3],data[0][4])
             elif i == 2:
-                user = Admin(data[0][1],data[0][2],data[0][0],data[0][3],data[0][4])
+                user = user.Admin(data[0][1],data[0][2],data[0][0],data[0][3],data[0][4])
             break
     return user
 
@@ -90,112 +91,6 @@ def verifyPassword(s,p):
     return passwordHash == s
 
 
-class User:
-
-    #initializes to create variables for name, keycode and id
-    def __init__(self,firstname,lastname,keycode,userType,password):
-        self.firstname = firstname
-        self.lastname = lastname
-        self.keycode = keycode
-        self.userType = userType
-        self.password = password
-        self.name = self.firstname+" "+self.lastname
-
-    def takeItemOut(self):
-        pass
-    def takeItemsBack(self):
-        pass
-    def searchItems(self):
-        pass
-    def getDetails(self):
-        pass
-class Student(User):
-    def UI(self):
-        print("student ui")
-#teacher class, inherits User.
-    def __init__(self):
-        pass
-
-class Teacher(User):
-    def UI(self):
-        print("teacher ui")
-
-class Admin(User):
-
-    def __init__(self,password):
-        self.password = password
-
-    def adminUI(self):
-        print("~~ WELCOME TO DONCASTER UNIVERSITY LIBRARY ~~")
-        while True:
-            command = input("1.)Take Out Item\n2.)Put Item Back\n3.)Search Items\n4.)")
-
-    #returns all data in a specific table.
-#    def createStudent():
-#        createUser(False,False,"")
-
-#    def createTeacher():
-#        createUser(True,False,"")
-
-#    def createAdmin():
-#        password = input("Password:")
-#        password =hashingPassword(password)
-#        createUser(False,True,password)
-
-
-    #right now this asks for a command and if it is 1, it says "||Scans can not
-    #be produced at the moment||" ? pretty sick tbh , will add nore when more is added
-    #this will be produced in a tkinter ui or something soon
-    def addItemUI(self):
-        while True:
-            command = input("What item would you like to add to the database?\n1.)Scan item\n2.)Book\n3.)Dvd\n4.)Cd\nb)Back\n>>").lower().strip(" ")
-            if command == "1":
-                print("||Scans can not be produced at the moment||")
-            elif command == "2":
-                pass
-            elif command == "3":
-                pass
-            elif command == "4":
-                pass
-            elif command == "b":
-                break
-            else:
-                print("||That is not a command||")
-
-    def addUserUI(self):
-        while True:
-            command = input("What type of user would you like to create?\n1.)Student\n2.)Teacher\n3.)Admin\nBack\n>>").lower().strip(" ")
-            if command == "1":
-                createUser(0,"")
-            elif command == "2":
-                createUser(1,"")
-            elif command == "3":
-                password = input("Password:")
-                password =hashingPassword(password)
-                createUser(2,password)
-            elif command == "b":
-                break
-            else:
-                print("||That is not a command||")
-
-    #basic ui for the admin
-    def UI(self):
-        print("~~ WELCOME TO DONCASTER UNIVERSITY LIBRARY ~~")
-        while True:
-            command = input("1.)Take Out Item\n2.)Put Item Back\n3.)Search Items\n4.)Add users\nb.)Back").lower().strip(" ")
-            if command == "1":
-                pass
-            elif command == "2":
-                #addItemUI()
-                pass
-            elif command == "3":
-                pass
-            elif command == "4":
-                pass
-            elif command == "b":
-                break
-            else:
-                print("||That is not a command||")
 
 #Login function to log into the system, currently just checks to see if
 #keycode is valid.
@@ -210,8 +105,9 @@ def login():
         elif command == "2":
             keyCode = input("Enter Key Code:")
             if checkForKeyCode(keyCode,"users") == True:
-                user = returnUserInfo(keyCode)
-                user.UI()
+                mainUser = returnUserInfo(keyCode)
+                print(mainUser)
+                #mainUser.UI()
                 cur.execute("SELECT keycode FROM users WHERE userType=0 AND WHERE keycode=",keycode)
             else:
                 print("||Key Code doesnt Exist||")
@@ -228,4 +124,4 @@ def login():
             print("||That is not a command||")
 
 
-#login()
+login()

@@ -1,15 +1,16 @@
-#"""
-#Database module.
-#
-#Used for interacting with the library database.
-#"""
+"""
+Database module.
+
+Used for interacting with the library database.
+"""
 
 import sqlite3 as sql
-#"""
-#sqlite3 module.
 
-#For use of a SQLite3 Database to store information.
-#"""
+"""
+sqlite3 module.
+
+For use of a SQLite3 Database to store information.
+"""
 
 
 class LibDb(object):
