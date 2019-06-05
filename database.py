@@ -5,6 +5,8 @@ Used for interacting with the library database.
 """
 
 import sqlite3 as sql
+import main
+import utils
 
 """
 sqlite3 module.
