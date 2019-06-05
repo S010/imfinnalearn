@@ -5,7 +5,7 @@ from sqlite3 import Error
 import hashlib, binascii , os ,random
 import database
 import user
-import utils
+import uti
 #https://stackabuse.com/a-sqlite-tutorial-with-python/
 cur = database.db.cur
 con = database.db.con
@@ -23,8 +23,8 @@ def login():
             print("||Scanner is currently unavailable||")
         elif command == "2":
             keyCode = input("Enter Key Code:")
-            if utils.checkForKeyCode(keyCode,"users") == True:
-                mainUser = utils.returnUserInfo(keyCode)
+            if uti.checkForKeyCode(keyCode,"users") == True:
+                mainUser = uti.returnUserInfo(keyCode)
                 print(mainUser)
                 #mainUser.UI()
                 cur.execute("SELECT keycode FROM users WHERE userType=0 AND WHERE keycode=",keycode)

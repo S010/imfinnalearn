@@ -2,7 +2,9 @@ import datetime
 import sqlite3 as s
 from sqlite3 import Error
 import database
-import utils
+import uti
+
+
 class User:
 
     #initializes to create variables for name, keycode and id
@@ -15,9 +17,9 @@ class User:
 # Charlie needs to do these three functions and i will do the rest :)
     def takeItemOut(self):
         pass
-    def takeItemsBack(self):
+    def returnItem(self):
         pass
-    def searchItems(self):
+    def myItems(self):
         pass
     #This returns what type of user the user is , this is used for Ui reasons atm
     def returnUserType(self):
@@ -32,7 +34,19 @@ class User:
 
 class Student(User):
     def UI(self):
-        pass
+        print("~~ WELCOME TO DONCASTER UNIVERSITY LIBRARY ~~\n~~ {} | {} ~~".format(self.name,self.returnUserType()))
+        while True:
+            command = input("1.)Take out item\n2.)Put item back\n3.)My items\nb.)Exit\n>>").lower().strip(" ")
+            if command == "1":
+                self.takeItemOut()
+            elif command == "2":
+                self.returnItem()
+            elif command == "3":
+                self.myItems()
+            elif command == "b":
+                break
+            else:
+                print("||Invalid command||")
 
 
 class Teacher(User):
@@ -47,17 +61,17 @@ class Admin(User):
     def deleteUserUI(self):
         while True:
             command = input("User keycode[Press b to go back]:").lower().strip(" ")
-            if utils.checkForKeyCode(command,"users") == True:
+            if uti.checkForKeyCode(command,"users") == True:
                 database.db.delUser(command)
                 print("User deleted")
-            elif command = "b":
+            elif command == "b":
                 break
             else:
                 print("||Invalid Command||")
     def deleteItemUI(self):
         while True:
             command = input("Item UID[Press b to go back]:").strip(" ")
-            if utils.checkForUID(command) == True:
+            if uti.checkForUID(command) == True:
                 database.db.delItem(command)
                 print("Item deleted")
             elif command == "b" or command == "B":
@@ -83,21 +97,24 @@ class Admin(User):
 
     def addUserUI(self):
         while True:
-            command = input("What type of user would you like to create?\n1.)Student\n2.)Teacher\n3.)Admin\nBack\n>>").lower().strip(" ")
+            command = input("What type of user would you like to create?\n1.)Student\n2.)Teacher\n3.)Admin\nb.)Back\n>>").lower().strip(" ")
             if command == "1":
-                keycode = utils.generateKeyCode()
+                keycode = uti.generateKeyCode()
                 name = input("Name:")
                 database.db.addUser(keycode, name, 0 , "")
                 print("||Student created||\n{}:{}".format(name,str(keycode)))
             elif command == "2":
-                keycode = utils.generateKeyCode()
+                keycode = uti.generateKeyCode()
                 name = input("Name:")
                 database.db.addUser(keycode, name, 1 , "")
                 print("||Teacher created||\n{}:{}".format(name,str(keycode)))
             elif command == "3":
+                keycode = uti.generateKeyCode()
+                name = input("Name:")
                 password = input("Password:")
                 password =hashingPassword(password)
-                createUser(2,password)
+                database.db.addUser(keycode, name, 2, password)
+                print("||Admin created||\n{}:{}".format(name,str(keycode)))
             elif command == "b":
                 break
             else:
@@ -107,13 +124,13 @@ class Admin(User):
     def UI(self):
         print("~~ WELCOME TO DONCASTER UNIVERSITY LIBRARY ~~\n~~ {} | {} ~~".format(self.name,self.returnUserType()))
         while True:
-            command = input("1.)Take Out Item\n2.)Put Items Back\n3.)Search Items\n4.)Add users\n5.)Delete users\n6.)Add Items\n7.)Delete Items\nb.)Back").lower().strip(" ")
+            command = input("1.)Take Out Item\n2.)Put Items Back\n3.)My Items\n4.)Add users\n5.)Delete users\n6.)Add Items\n7.)Delete Items\nb.)Back").lower().strip(" ")
             if command == "1":
                 self.takeItemsOut()
             elif command == "2":
-                self.takeItemsBack()
+                self.returnItems()
             elif command == "3":
-                self.searchItems()
+                self.myItems()
             elif command == "4":
                 self.addUserUI()
             elif command == "5":
@@ -127,3 +144,4 @@ class Admin(User):
                 break
             else:
                 print("||That is not a command||")
+#Admin.addUserUI(Admin)

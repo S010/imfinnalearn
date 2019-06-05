@@ -6,6 +6,7 @@ import hashlib, binascii , os ,random
 import database
 import user
 #https://stackabuse.com/a-sqlite-tutorial-with-python/
+
 cur = database.db.cur
 con = database.db.con
 

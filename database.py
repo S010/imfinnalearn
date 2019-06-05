@@ -6,7 +6,7 @@ Used for interacting with the library database.
 
 import sqlite3 as sql
 import main
-import utils
+import uti
 
 """
 sqlite3 module.
@@ -71,7 +71,7 @@ class LibDb(object):
     def seeAll(self,table):
         try:
             self.cur.execute("""SELECT * FROM """+table)
-            data = cur.fetchall()
+            data = self.cur.fetchall()
             return data
         except Exception as e:
             print("Error: %s"% str(e))
