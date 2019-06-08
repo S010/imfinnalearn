@@ -1,9 +1,10 @@
+import tkinter as t
 import datetime
 import sqlite3 as s
 from sqlite3 import Error
+import hashlib, binascii , os ,random
 import database
-import uti
-
+import user
 
 class User:
 
@@ -15,11 +16,11 @@ class User:
         self.name = name
 
 # Charlie needs to do these three functions and i will do the rest :)
-    def takeItemOut(self):
+    def takeItemOutUI(self):
         pass
-    def returnItem(self):
+    def returnItemUI(self):
         pass
-    def myItems(self):
+    def myItemsUI(self):
         pass
     #This returns what type of user the user is , this is used for Ui reasons atm
     def returnUserType(self):
@@ -54,14 +55,11 @@ class Teacher(User):
         print("teacher ui")
 
 class Admin(User):
-    #returns all data in a specific table.
-    #right now this asks for a command and if it is 1, it says "||Scans can not
-    #be produced at the moment||" ? pretty sick tbh , will add nore when more is added
     #this will be produced in a tkinter ui or something soon
     def deleteUserUI(self):
         while True:
             command = input("User keycode[Press b to go back]:").lower().strip(" ")
-            if uti.checkForKeyCode(command,"users") == True:
+            if database.db.checkForKeyCode(command,"users") == True:
                 database.db.delUser(command)
                 print("User deleted")
             elif command == "b":
@@ -71,13 +69,14 @@ class Admin(User):
     def deleteItemUI(self):
         while True:
             command = input("Item UID[Press b to go back]:").strip(" ")
-            if uti.checkForUID(command) == True:
+            if database.db.checkForUID(command) == True:
                 database.db.delItem(command)
                 print("Item deleted")
             elif command == "b" or command == "B":
                 break
             else:
                 print("||Invalid command||")
+
     def addItemUI(self):
         while True:
             command = input("What item would you like to add to the database?\n1.)Scan item\n2.)Book\nb)Back\n>>").lower().strip(" ")
@@ -99,17 +98,17 @@ class Admin(User):
         while True:
             command = input("What type of user would you like to create?\n1.)Student\n2.)Teacher\n3.)Admin\nb.)Back\n>>").lower().strip(" ")
             if command == "1":
-                keycode = uti.generateKeyCode()
+                keycode = database.db.generateKeyCode()
                 name = input("Name:")
                 database.db.addUser(keycode, name, 0 , "")
                 print("||Student created||\n{}:{}".format(name,str(keycode)))
             elif command == "2":
-                keycode = uti.generateKeyCode()
+                keycode = database.db.generateKeyCode()
                 name = input("Name:")
                 database.db.addUser(keycode, name, 1 , "")
                 print("||Teacher created||\n{}:{}".format(name,str(keycode)))
             elif command == "3":
-                keycode = uti.generateKeyCode()
+                keycode = database.db.generateKeyCode()
                 name = input("Name:")
                 password = input("Password:")
                 password =hashingPassword(password)
@@ -139,7 +138,6 @@ class Admin(User):
                 self.addItemUI()
             elif command == "7":
                 self.deleteItemUI()
-
             elif command == "b":
                 break
             else:

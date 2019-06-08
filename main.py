@@ -5,11 +5,7 @@ from sqlite3 import Error
 import hashlib, binascii , os ,random
 import database
 import user
-import uti
 #https://stackabuse.com/a-sqlite-tutorial-with-python/
-cur = database.db.cur
-con = database.db.con
-
 
 #Login function to log into the system, currently just checks to see if
 #keycode is valid.
@@ -23,11 +19,11 @@ def login():
             print("||Scanner is currently unavailable||")
         elif command == "2":
             keyCode = input("Enter Key Code:")
-            if uti.checkForKeyCode(keyCode,"users") == True:
-                mainUser = uti.returnUserInfo(keyCode)
+            if database.db.checkForKeyCode(keyCode,"users") == True:
+                mainUser = database.db.returnUserInfo(keyCode)
                 print(mainUser)
                 #mainUser.UI()
-                cur.execute("SELECT keycode FROM users WHERE userType=0 AND WHERE keycode=",keycode)
+                #cur.execute("SELECT keycode FROM users WHERE userType=0 AND WHERE keycode=",keycode)
             else:
                 print("||Key Code doesnt Exist||")
 
