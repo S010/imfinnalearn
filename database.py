@@ -9,7 +9,6 @@ import datetime
 import sqlite3 as s
 from sqlite3 import Error
 import hashlib, binascii , os ,random
-import database
 import user
 
 """
@@ -73,9 +72,9 @@ class LibDb(object):
         self.cur.execute("""INSERT INTO takenItems (takenID,uid,keycode) VALUES (?, ?, ?)""",
                         (takenID,uid,keycode))
         self.con.commit()
-#WHY IS THIS NOT FUCKING WORKING WTF
+
     def delItemTakenItems(self,uid,keycode):
-        self.cur.execute("""DELETE FROM takenItems WHERE uid=? WHERE keycode=?""",
+        self.cur.execute("""DELETE FROM takenItems WHERE uid=? AND keycode=?""",
                         (uid,keycode))
         self.con.commit()
 
@@ -100,25 +99,13 @@ class LibDb(object):
         except Exception as e:
             print("Error: %s"% str(e))
 
-    def returnUserInfo(self,keyCode):
-        for i in range(3):
-            self.cur.execute("SELECT * FROM users WHERE userType=? AND keycode=?",(i,keyCode))
-            data = self.cur.fetchall()
-            if not data:
-                print("User type is not "+str(i))
-            else:
-                print("User type is "+str(i))
-                if i == 0:
-                    user = user.Student(data[0][1],data[0][2],data[0][0],data[0][3],data[0][4])
-                elif i == 1:
-                    user = user.Teacher(data[0][1],data[0][2],data[0][0],data[0][3],data[0][4])
-                elif i == 2:
-                    user = user.Admin(data[0][1],data[0][2],data[0][0],data[0][3],data[0][4])
-                break
-        return user
+    def returnUserInfo(self,keycode):
+        self.cur.execute("""SELECT * FROM users WHERE keycode=?""",(keycode,))
+        data = self.cur.fetchall()
+        return data
 
-    def checkForKeyCode(self,r,table):
-        self.cur.execute('SELECT keycode FROM '+table+' WHERE keycode='+str(r))
+    def checkForKeyCode(self,r):
+        self.cur.execute("""SELECT keycode FROM users WHERE keycode=?""",(r,))
         data = self.cur.fetchall()
         if not data:
             return False
@@ -144,7 +131,7 @@ class LibDb(object):
     def generateKeyCode(self):
         while True:
             randomKey = random.randint(0,999999999)
-            if self.checkForKeyCode(randomKey,"users") == False:
+            if self.checkForKeyCode(randomKey) == False:
                 return randomKey
 
     def checkTakenID(self,taken):
@@ -183,22 +170,38 @@ class LibDb(object):
         else:
             self.addItemTakenItems(self.generateTakenID(), uid, keycode)
 
-    def putItems(self,uid,keycode):
-        self.cur.execute("""SELECT uid FROM takenItems WHERE uid=? AND keycode=?""",(uid,keycode,))
-        data = self.cur.fetchall()
-        if not data:
-            self.delItemTakenItems(uid, keycode)
-        else:
-            print("You do not own this item")
+    #def putItems(self,uid,keycode):
+    #    self.cur.execute("""SELECT uid FROM takenItems WHERE uid=? AND keycode=?""",(uid,keycode,))
+    #    data = self.cur.fetchall()
+    #    if not data:
+    #        self.delItemTakenItems(uid, keycode)
+    #    else:
+    #        print("You do not own this item")
 
-    def myItems(self,uid,keycode):
-        self.cur.execute("""SELECT * WHERE keycode=?""",(keycode))
+    def myItems(self,keycode):
+        items = []
+        self.cur.execute("""SELECT * FROM takenItems WHERE keycode=?""",(keycode,))
         data = self.cur.fetchall()
         for i in data:
-            print (i)
+            self.cur.execute("""SELECT * FROM items WHERE uid=?""",(i[2],))
+            j = self.cur.fetchall()
+            items.append(j)
+        return items
+
+    def returnItemBy(self,by,index):
+        self.cur.execute("""SELECT * FROM items WHERE ?=?""",(by,index,))
+        data = self.cur.fetchall()
+        return data
+
+    def checkForItems(self,by,index):
+        self.cur.execute("""SELECT ? FROM items WHERE ?=?""",(by,index,by))
+        data = cur.fetchall()
+        if not data:
+            return False
+        else:
+            return True
 
 db = LibDb()
 #db.addUser(db.generateKeyCode(), "Jacob Morgan", 2, db.hashingPassword("1234"))
-#98219281
-db.delItemTakenItems(1, 98219281)
-db.addItemTakenItems(db.generateTakenID(),1, 98219281)
+#98219281 yikes
+#print(db.myItems(98219281))
